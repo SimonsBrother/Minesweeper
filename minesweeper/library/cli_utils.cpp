@@ -4,37 +4,37 @@
 using namespace std;
 
 // Displays the grid
-void printGrid(int** grid, unsigned short grid_size_x, unsigned short grid_size_y, bool reveal_mines) {
-    unsigned short grid_size_x_digit_count = countDigits(grid_size_x);
-    unsigned short grid_size_y_digit_count = countDigits(grid_size_y);
+void printGrid(minefield field, bool reveal_mines) {
+    int grid_size_x_digit_count = countDigits(field.width);
+    int grid_size_y_digit_count = countDigits(field.height);
     
     // Print numbered header
     printChar(' ', grid_size_y_digit_count);
     cout << ' '; // Gap
-    for (int i = 1; i <= grid_size_x; i++)
+    for (int i = 1; i <= field.width; i++)
     {
-        printChar(' ', grid_size_x_digit_count - countDigits(i));
+        printChar(' ', grid_size_x_digit_count - countDigits(i)); // Spacing
         cout << i << ' '; // Print number and a gap
     }
     cout << '\n';
 
     // Print rows
-    for (int y = 1; y <= grid_size_y; y++)
+    for (int y = 1; y <= field.height; y++)
     {
         // Print row number
         printChar(' ', grid_size_y_digit_count - countDigits(y));
         cout << y;
         
         // Print each square
-        for (int x = 0; x < grid_size_x; x++)
+        for (int x = 0; x < field.width; x++)
         {
-            // Spacing
-            printChar(' ', grid_size_x_digit_count);
-            if (grid[x][y] == 1) {
+            printChar(' ', grid_size_x_digit_count); // Spacing
+            if (field.grid[x][y] == MINE) {
                 cout << 'x';
             }
             else {
-                cout << "\u25A0";
+                cout << '?';
+                //cout << "\u25A0";
             }
         }
         cout << '\n';
@@ -49,7 +49,7 @@ int countDigits(int number) {
     }
 
     // Integer division by 10 as many times as needed to get number to 0
-    unsigned short count = 0;
+    int count = 0;
     while (number != 0) {
         number /= 10;    
         count++;
@@ -116,7 +116,7 @@ int* parseCommand(string command) {
 }
 
 // Ensures a command has coordinates within the grid, and either a command to flag (f) or check (c)
-bool validateCommand(int* command_parts, unsigned short grid_size_x, unsigned short grid_size_y) {
+bool validateCommand(int* command_parts, int grid_size_x, int grid_size_y) {
     return command_parts != NULL && 
                 (command_parts[0] > 0 && command_parts[0] <= grid_size_x &&
                 command_parts[1] > 0 && command_parts[1] <= grid_size_y &&

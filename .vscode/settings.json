@@ -54,5 +54,6 @@
         "variant": "cpp",
         "vector": "cpp",
         "algorithm": "cpp"
-    }
+    },
+    "explorer.excludeGitIgnore": true
 }
