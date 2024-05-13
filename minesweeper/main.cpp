@@ -6,11 +6,13 @@ using namespace std;
 
 int main()
 {
-    int grid_size_x = 16;
-    int grid_size_y = 16;
+    int grid_size_x = 3;
+    int grid_size_y = 3;
+    int starting_x = 1;
+    int starting_y = 1;
 
     // Create 2D grid
-    minefield field = generateMinefield(grid_size_x, grid_size_y, 10);
+    minefield field = generateMinefield(grid_size_x, grid_size_y, 50, starting_x, starting_y);
     printGrid(field, false);
 
     // Main loop for user input
@@ -37,7 +39,6 @@ int main()
     }
 
     // Display board
-
     if (won) {
         cout << "You won!\n";
     }

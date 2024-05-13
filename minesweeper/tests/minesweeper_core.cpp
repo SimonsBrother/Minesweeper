@@ -5,5 +5,5 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-    int** grid = generateGrid(10, 10, 10);
+    int** grid = generateBlankGrid(10, 10, 10);
 }

@@ -11,15 +11,21 @@ struct minefield {
     int width;
     int height;
     int** grid;
+
+    // The starting coorinates are important for adding mines, as mines should not be at the starting square.
+    // The reason this is in the minefield structure is to minimise the need for parameters.
+    int starting_x;
+    int starting_y;
 };
 
-minefield generateMinefield(int width, int height, float percentage);
-int** generateGrid(int width, int height);
+minefield generateMinefield(int width, int height, float percentage, int starting_x, int starting_y);
+int** generateBlankGrid(int width, int height);
 void addPercentageOfMines(minefield& field, float percentage);
 void addMinesToGrid(minefield& field, int num_mines);
 void addFlag(int** grid, int x, int y);
-void checkSquare(minefield& field, int x, int y);
-int countMines(minefield& field, int x, int y);
+bool checkSquare(minefield& field, int x, int y);
+int countSurroundingMines(minefield& field, int x, int y);
+bool isSquareValid(minefield& field, int x, int y);
 bool isSquareMine(int square_value);
 void deleteGrid(minefield& field);
 

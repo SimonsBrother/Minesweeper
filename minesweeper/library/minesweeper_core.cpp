@@ -5,29 +5,42 @@
 
 using namespace std;
 
-// Generates a minefield with mines given the size and percentage of mines
-minefield generateMinefield(int width, int height, float percentage) {
+// Test validation
+// Generates a minefield with mines given the size and percentage of mines, as well as the starting x and y coordinates.
+minefield generateMinefield(int width, int height, float percentage, int starting_x, int starting_y) {
+    // Validate starting square coordinates; width and height are validated in generateBlnkGrind and percentage is validated in addPercentageOfMines
+    if (starting_x < 0 || starting_y < 0 || starting_x >= width || starting_y >= height) {
+        throw "Starting square coordinates are invalid.";
+    }
+
     minefield field;
     field.width = width;
     field.height = height;
-    field.grid = generateGrid(width, height);
+    field.starting_x = starting_x;
+    field.starting_y = starting_y;
+    field.grid = generateBlankGrid(width, height);
 
     addPercentageOfMines(field, percentage);
 
     return field;
 }
 
-// Generates a grid of blank squares
-int** generateGrid(int width, int height) {
+// Generates a 2D array "grid" of blank squares
+int** generateBlankGrid(int width, int height) {
+    if (width < 0 || height < 0) {
+        throw "Invalid width or height.";
+    }
     // Generate 2D array to represent the grid
     int** grid = new int*[width];
+    
+    // For each column, generate grid_size_y rows
     for (int x = 0; x < width; x++) {
-        // For each column, generate grid_size_y rows
         grid[x] = new int[height];
 
-        // Make rows blank
+        // Go through each row...
         for (int y = 0; y < height; y++)
         {
+            // ...and make each cell blank.
             grid[x][y] = BLANK;
         }
     }
@@ -35,7 +48,7 @@ int** generateGrid(int width, int height) {
     return grid;
 }
 
-// Makes a certain percentage of the board to mines. The percentage must be greater than 0 abd less than 100.
+// Makes a certain percentage of the board to mines. The percentage must be greater than 0 and less than 100.
 void addPercentageOfMines(minefield& field, float percentage) {
     // Validate percentage
     if (percentage <= 0 || percentage >= 100) {
@@ -44,7 +57,7 @@ void addPercentageOfMines(minefield& field, float percentage) {
 
     // Calculate the number of mines needed
     int num_squares = field.width * field.height;
-    int num_mines = num_squares * (percentage / 100);
+    int num_mines = round(num_squares * (percentage / 100));
     
     addMinesToGrid(field, num_mines);
 }
@@ -60,12 +73,18 @@ void addMinesToGrid(minefield& field, int num_mines) {
     srand((unsigned)time(NULL));
     for (int i = 0; i < num_mines; i++)
     {
-        // Set a random x and y coordinate to be a MINE
+        // Come up with a random x and y coordinate
         int random_x = rand() % field.width;
         int random_y = rand() % field.height;
-        int* square = &field.grid[random_x][random_y];
-        if (*square != MINE) {
-            *square = MINE;// to test
+
+        // Get the square in question, check if its blank or if its at the starting square; mines should never 
+        // be placed at the starting square, nor should they replace an existing mine (because this would lead to the wrong number of mines being placed).
+        int* square = &(field.grid[random_x][random_y]);
+        bool square_is_blank = *square == BLANK;
+        bool square_is_starting_square = random_x == field.starting_x && random_y == field.starting_y;
+
+        if (square_is_blank && !square_is_starting_square) {
+            *square = MINE;
         }
         else {
             i--; // Loop again
@@ -93,47 +112,68 @@ void addFlag(int** grid, int x, int y) {
 }
 
 // Unfinished
-// Checks the square of the grid at the coordinates provided
-void checkSquare(minefield& field, int x, int y) {
-    int* target_address = &(field.grid[x][y]);
+// Checks the square of the grid at the coordinates; it is assumed the coordinates are 0 indexed provided. Returns true if it is safe.
+bool checkSquare(minefield& field, int x, int y) {
+    int* target_ptr = &(field.grid[x][y]);
 
-    if (*target_address == BLANK) {
-        *target_address = countMines(field, x, y);
+    // User checked a mine, not safe, lost game
+    if (*target_ptr == MINE) {
+        return false;
     }
+
+    // Check if the square is blank
+    if (*target_ptr == BLANK) {
+        *target_ptr = countSurroundingMines(field, x, y);
+
+        // If there are no mines around the square, automatically check the squares around the initial square
+        if (*target_ptr == 0) {
+            int offset_x;
+            int offset_y;
+            for (int i = -1; i < 1; i++) {
+                offset_x = x + i;
+                for (int j = -1; j < 1; j++) {
+                    offset_y = y + j;
+
+                    // If the square is valid, check it
+                    if (isSquareValid(field, offset_x, offset_y)) {
+                        int num_mints = checkSquare(field, offset_x, offset_y);
+                    }
+                }
+            }
+        }        
+    }
+
+    // Flagged squares do nothing.
+    return true;
 }
 
-// Count the mines around some square given by the coordinates x and y. The parameters x and y should not be 0 indexed.
-int countMines(minefield& field, int x, int y) {
+// Count the mines around some square given by the coordinates x and y. The parameters x and y should be 0 indexed.
+int countSurroundingMines(minefield& field, int x, int y) {
     // Use nested for loop to create offsets from -1 to 1 on both axis
-    int count = 0;
+    int mine_count = 0;
     int offset_x;
     int offset_y;
-    for (int i = -1; i < 1; i++)
-    {
+    for (int i = -1; i < 1; i++) {
         offset_x = x + i;
-        for (int j = -1; j < 1; j++)
-        {
+        for (int j = -1; j < 1; j++) {
             offset_y = y + j;
-            // Check offset coordinate is valid, and then if the square has a mine
-            if (offset_x >= 1 && offset_x <= field.width &&
-                    offset_y >= 1 && offset_y <= field.height &&
-                    isSquareMine(field.grid[offset_x - 1][offset_y - 1])) {
-                // If a valid set of offset coordinates, 
-                count++;
+
+            // Check offset coordinate is valid, and then if the square has a mine. Check validity first, lazy evaluation will prevent error.
+            if (isSquareValid(field, offset_x, offset_y) && isSquareMine(field.grid[offset_x][offset_y])) {
+                mine_count++;
             }
         }
     }
 
-    return count;
+    return mine_count;
+}
+
+// Returns true if the coordinates provided are valid. Coordinates must be 0 indexed.
+bool isSquareValid(minefield& field, int x, int y) {
+    return (x >= 0 && x < field.width) && (y >= 0 && y < field.height);
 }
 
 // Returns true if the value provided is MINE or FLAGGED_MINE
 bool isSquareMine(int square_value) {
     return square_value == MINE || square_value == FLAGGED_MINE;
-}
-
-// Unfinished
-// Deletes the grid of a minefield
-void deleteGrid(minefield& field) {
-
 }

@@ -4,40 +4,82 @@
 using namespace std;
 
 // Displays the grid
-void printGrid(minefield field, bool reveal_mines) {
+void printGrid(minefield field, bool reveal_mines, bool use_square_for_blanks) {
     int grid_size_x_digit_count = countDigits(field.width);
     int grid_size_y_digit_count = countDigits(field.height);
     
+    printGridHeader(field, grid_size_x_digit_count, grid_size_y_digit_count);
+
+    // For each row
+    for (int y = 0; y < field.height; y++)
+    {
+        // Print row number
+        printChar(' ', grid_size_y_digit_count - countDigits(y + 1)); // Spacing before row number
+        cout << y + 1;
+        
+        // For each column
+        for (int x = 0; x < field.width; x++)
+        {
+            // Print spacing between columns
+            printChar(' ', grid_size_x_digit_count);
+            printGridSquare(field.grid[x][y], reveal_mines, use_square_for_blanks);
+        }
+        cout << '\n';
+    }
+}
+
+// Print numbered header of the grid of a minefield
+void printGridHeader(minefield field, int grid_size_x_digit_count, int grid_size_y_digit_count) {
     // Print numbered header
-    printChar(' ', grid_size_y_digit_count);
-    cout << ' '; // Gap
+    printChar(' ', grid_size_y_digit_count); // Add blank area for the numbered rows
+    cout << ' '; // Gap between numbered rows and values
     for (int i = 1; i <= field.width; i++)
     {
         printChar(' ', grid_size_x_digit_count - countDigits(i)); // Spacing
         cout << i << ' '; // Print number and a gap
     }
     cout << '\n';
+}
 
-    // Print rows
-    for (int y = 1; y <= field.height; y++)
-    {
-        // Print row number
-        printChar(' ', grid_size_y_digit_count - countDigits(y));
-        cout << y;
-        
-        // Print each square
-        for (int x = 0; x < field.width; x++)
-        {
-            printChar(' ', grid_size_x_digit_count); // Spacing
-            if (field.grid[x][y] == MINE) {
+// Print the value of some square, with different symbols.
+void printGridSquare(int square_value, bool show_mines, bool use_square_for_blanks) {
+    switch (square_value) {
+        case MINE:
+            // If meant to show mines, display the mine and break
+            if (show_mines) {
                 cout << 'x';
+                break;
+            }
+            // If not meant to show mines, show blank via not breaking, and fall through to blank case
+
+        case BLANK:
+            if (show_mines) {
+                cout << "."; // Show full stop for showing results for clarity
+            }
+            else if (use_square_for_blanks) {
+                // Print a square rather than a question mark (only supported on some terminals)
+                cout << "\u25A0";
             }
             else {
                 cout << '?';
-                //cout << "\u25A0";
             }
-        }
-        cout << '\n';
+            break;
+
+        case FLAGGED_MINE:
+            // If meant to show mines, display the mine and break
+            if (show_mines) {
+                cout << 'X'; // Uppercase to indicate found mine
+                break;
+            }
+            // If not, don't break, to fall through to flag
+
+        case FLAGGED_BLANK:
+            cout << "f";
+            break;
+
+        default:
+            // At this point the value will be a discovered square with the number of mines around it
+            cout << square_value;
     }
 }
 
