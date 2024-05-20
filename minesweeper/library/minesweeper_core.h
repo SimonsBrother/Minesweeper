@@ -22,7 +22,7 @@ minefield generateMinefield(int width, int height, float percentage, int startin
 int** generateBlankGrid(int width, int height);
 void addPercentageOfMines(minefield& field, float percentage);
 void addMinesToGrid(minefield& field, int num_mines);
-void addFlag(int** grid, int x, int y);
+void addFlag(minefield field, int x, int y);
 bool checkSquare(minefield& field, int x, int y);
 int countSurroundingMines(minefield& field, int x, int y);
 bool isSquareValid(minefield& field, int x, int y);

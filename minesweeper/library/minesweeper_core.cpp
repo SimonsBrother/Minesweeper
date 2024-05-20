@@ -6,7 +6,7 @@
 using namespace std;
 
 // Test validation
-// Generates a minefield with mines given the size and percentage of mines, as well as the starting x and y coordinates.
+// Generates a minefield with mines given the size and percentage of mines, as well as the starting x and y coordinates (0-indexed).
 minefield generateMinefield(int width, int height, float percentage, int starting_x, int starting_y) {
     // Validate starting square coordinates; width and height are validated in generateBlnkGrind and percentage is validated in addPercentageOfMines
     if (starting_x < 0 || starting_y < 0 || starting_x >= width || starting_y >= height) {
@@ -27,7 +27,7 @@ minefield generateMinefield(int width, int height, float percentage, int startin
 
 // Generates a 2D array "grid" of blank squares
 int** generateBlankGrid(int width, int height) {
-    if (width < 0 || height < 0) {
+    if (width <= 0 || height <= 0) {
         throw "Invalid width or height.";
     }
     // Generate 2D array to represent the grid
@@ -66,8 +66,8 @@ void addPercentageOfMines(minefield& field, float percentage) {
 void addMinesToGrid(minefield& field, int num_mines) {
     // Validate number of mines
     int num_squares = field.width * field.height;
-    if (num_mines > num_squares) {
-        throw "More mines than squares.";
+    if (num_mines >= num_squares) {
+        throw "Too many mines (must be less than number of squares).";
     }
 
     srand((unsigned)time(NULL));
@@ -92,9 +92,13 @@ void addMinesToGrid(minefield& field, int num_mines) {
     }
 }
 
-// Toggles a flag of a square in the grid
-void addFlag(int** grid, int x, int y) {
-    int* target_address = &(grid[x][y]);
+// Toggles a flag of a square in the grid - note this doesn't check if the square is valid.
+void addFlag(minefield field, int x, int y) {
+    if (x < 0 || x >= field.width || y < 0 || y >= field.height) {
+        throw "Coordinates out of bounds.";
+    }
+
+    int* target_address = &(field.grid[x][y]);
     switch (*target_address) {
     case BLANK:
         *target_address = FLAGGED_BLANK;
@@ -111,7 +115,7 @@ void addFlag(int** grid, int x, int y) {
     }
 }
 
-// Unfinished
+// untested
 // Checks the square of the grid at the coordinates; it is assumed the coordinates are 0 indexed provided. Returns true if it is safe.
 bool checkSquare(minefield& field, int x, int y) {
     int* target_ptr = &(field.grid[x][y]);
