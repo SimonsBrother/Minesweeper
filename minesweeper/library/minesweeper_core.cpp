@@ -93,8 +93,8 @@ void addMinesToGrid(minefield& field, int num_mines) {
 }
 
 // Toggles a flag of a square in the grid - note this doesn't check if the square is valid.
-void addFlag(minefield field, int x, int y) {
-    if (x < 0 || x >= field.width || y < 0 || y >= field.height) {
+void addFlag(minefield& field, int x, int y) {
+    if (!isSquareValid(field, x, y)) {
         throw "Coordinates out of bounds.";
     }
 
@@ -129,7 +129,8 @@ bool checkSquare(minefield& field, int x, int y) {
     if (*target_ptr == BLANK) {
         *target_ptr = countSurroundingMines(field, x, y);
 
-        // If there are no mines around the square, automatically check the squares around the initial square
+        // If there are no mines around the square, automatically check the squares around the 
+        // initial square (which seems to be how the game works, generating blank areas)
         if (*target_ptr == 0) {
             int offset_x;
             int offset_y;
@@ -157,9 +158,14 @@ int countSurroundingMines(minefield& field, int x, int y) {
     int mine_count = 0;
     int offset_x;
     int offset_y;
-    for (int i = -1; i < 1; i++) {
+    for (int i = -1; i <= 1; i++) {
         offset_x = x + i;
-        for (int j = -1; j < 1; j++) {
+        for (int j = -1; j <= 1; j++) {
+            // Ignore the square at which the surrounding squares are being counted
+            if (i == 0 && j == 0) {
+                continue;
+            }
+            
             offset_y = y + j;
 
             // Check offset coordinate is valid, and then if the square has a mine. Check validity first, lazy evaluation will prevent error.

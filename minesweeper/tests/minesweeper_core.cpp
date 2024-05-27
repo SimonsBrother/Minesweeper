@@ -9,12 +9,16 @@ int countMines(minefield field);
 void runAddFlagTests();
 void testValidAddFlag(minefield field, int x, int y);
 void testInvalidAddFlag(minefield field, int x, int y);
+void runCountSurroundingMinesTests();
+void testCountSurroundingMines(minefield field, int x, int y, int expected_count);
 
 int main(int argc, char** argv) {
     cout << "generateMinefield tests\n";
     runGenerateMinefieldTests();
     cout << "\n\naddFlag tests\n";
     runAddFlagTests();
+    cout << "\n\ncountSurroundingMines tests\n";
+    runCountSurroundingMinesTests();
 }
 
 // Tests generateMinefield and indirectly tests generateBlankGrid, addPercentageOfMines, addMinesToGrid
@@ -112,7 +116,7 @@ int countMines(minefield field) {
     return count;
 }
 
-// Tests addFlag
+// Tests addFlag and indirectly tests isSquareValid
 void runAddFlagTests() {
     // Test valid use
     minefield field = generateMinefield(10, 10, 50, 4, 4);
@@ -170,5 +174,47 @@ void testInvalidAddFlag(minefield field, int x, int y) {
     }
     catch (char const* exception) {
         printf("PASS: Caught exception as expected (%s), for x %i y %i\n", exception, x, y);
+    }
+}
+
+// Tests countSurroundingMines and indirectly tests isSquareValid (again) and also isSquareMine
+void runCountSurroundingMinesTests() {
+    minefield field = generateMinefield(6, 6, 1, 1, 1);
+    field.grid[0] = new int[6]{MINE, MINE, MINE, BLANK, BLANK, BLANK};  // xxx...
+    field.grid[1] = new int[6]{MINE, BLANK, MINE, BLANK, BLANK, BLANK}; // x.x...
+    field.grid[2] = new int[6]{MINE, MINE, MINE, BLANK, BLANK, BLANK};  // xxx...
+    field.grid[3] = new int[6]{FLAGGED_MINE, FLAGGED_MINE, FLAGGED_MINE, FLAGGED_BLANK, FLAGGED_BLANK, FLAGGED_BLANK}; // Repeated pattern but flagged versions
+    field.grid[4] = new int[6]{FLAGGED_MINE, FLAGGED_BLANK, FLAGGED_MINE, FLAGGED_BLANK, FLAGGED_BLANK, FLAGGED_BLANK};
+    field.grid[5] = new int[6]{FLAGGED_MINE, FLAGGED_MINE, FLAGGED_MINE, FLAGGED_BLANK, FLAGGED_BLANK, FLAGGED_BLANK};
+
+    // Test some mines
+    testCountSurroundingMines(field, 1, 3, 3);
+    
+    // Test no mines
+    testCountSurroundingMines(field, 1, 4, 0);
+
+    // Test max mines
+    testCountSurroundingMines(field, 1, 1, 8);
+
+    // Some flagged some blank
+    testCountSurroundingMines(field, 2, 4, 0);
+
+    // Some flagged mines, some mines, some flagged blank, some blank
+    testCountSurroundingMines(field, 2, 3, 3);
+
+    // Test corners
+    testCountSurroundingMines(field, 0, 0, 2);
+    testCountSurroundingMines(field, 5, 0, 2);
+    testCountSurroundingMines(field, 0, 5, 0);
+    testCountSurroundingMines(field, 5, 5, 0);
+}
+
+void testCountSurroundingMines(minefield field, int x, int y, int expected_count) {
+    int actual_count = countSurroundingMines(field, x, y);
+    if (actual_count == expected_count) {
+        printf("PASS - x: %i, y: %i - EXPECTED: %i\n", x, y, expected_count);
+    }
+    else {
+        printf("FAIL - x: %i, y: %i - EXPECTED: %i, ACTUAL: %i\n", x, y, expected_count, actual_count);
     }
 }

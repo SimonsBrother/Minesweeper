@@ -10,6 +10,8 @@
 struct minefield {
     int width;
     int height;
+    // Each cell is an integer, with negative values representing special states such as if it
+    // is a mine. 0 or positive numbers are the number of mines around it.
     int** grid;
 
     // The starting coorinates are important for adding mines, as mines should not be at the starting square.
@@ -22,7 +24,7 @@ minefield generateMinefield(int width, int height, float percentage, int startin
 int** generateBlankGrid(int width, int height);
 void addPercentageOfMines(minefield& field, float percentage);
 void addMinesToGrid(minefield& field, int num_mines);
-void addFlag(minefield field, int x, int y);
+void addFlag(minefield& field, int x, int y);
 bool checkSquare(minefield& field, int x, int y);
 int countSurroundingMines(minefield& field, int x, int y);
 bool isSquareValid(minefield& field, int x, int y);
