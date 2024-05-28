@@ -11,6 +11,8 @@ void testValidAddFlag(minefield field, int x, int y);
 void testInvalidAddFlag(minefield field, int x, int y);
 void runCountSurroundingMinesTests();
 void testCountSurroundingMines(minefield field, int x, int y, int expected_count);
+void setGridForCheckSquareTests(int** grid);
+void runCheckSquareTests();
 
 int main(int argc, char** argv) {
     cout << "generateMinefield tests\n";
@@ -19,6 +21,8 @@ int main(int argc, char** argv) {
     runAddFlagTests();
     cout << "\n\ncountSurroundingMines tests\n";
     runCountSurroundingMinesTests();
+
+    runCheckSquareTests();
 }
 
 // Tests generateMinefield and indirectly tests generateBlankGrid, addPercentageOfMines, addMinesToGrid
@@ -217,4 +221,33 @@ void testCountSurroundingMines(minefield field, int x, int y, int expected_count
     else {
         printf("FAIL - x: %i, y: %i - EXPECTED: %i, ACTUAL: %i\n", x, y, expected_count, actual_count);
     }
+}
+
+// Tests checkSquare
+void runCheckSquareTests() {
+    minefield field = generateMinefield(6, 6, 1, 1, 1);
+
+    // Check correctly identified unsafe
+    setGridForCheckSquareTests(field.grid);
+
+    // Check correctly identified safe
+
+    // Test recursively checks correctly (adjacent 0-nearby-mines squares are auto checked)
+    // Check single square
+
+    // Check large even area, which is also a cornered area
+
+    // Check large uneven area
+
+    // Test checking already checked square does nothing
+
+}
+
+void setGridForCheckSquareTests(int** grid) {
+    grid = new int*[6]{new int[6]{BLANK, MINE, MINE, MINE, BLANK, BLANK},
+                       new int[6]{BLANK, MINE, BLANK, MINE, MINE, MINE},
+                       new int[6]{BLANK, MINE, MINE, MINE, BLANK, MINE},
+                       new int[6]{BLANK, MINE, BLANK, MINE, BLANK, MINE},
+                       new int[6]{BLANK, MINE, BLANK, BLANK, BLANK, MINE},
+                       new int[6]{BLANK, MINE, MINE, MINE, MINE, MINE}};
 }
