@@ -26,16 +26,16 @@ minefield generateMinefield(int width, int height, float percentage, int startin
 }
 
 // Generates a 2D array "grid" of blank squares
-int** generateBlankGrid(int width, int height) {
+vector<vector<int>> generateBlankGrid(int width, int height) {
     if (width <= 0 || height <= 0) {
         throw "Invalid width or height.";
     }
     // Generate 2D array to represent the grid
-    int** grid = new int*[width];
+    vector<vector<int>> grid(width);
     
     // For each column, generate grid_size_y rows
     for (int x = 0; x < width; x++) {
-        grid[x] = new int[height];
+        grid[x] = vector<int>(height);
 
         // Go through each row...
         for (int y = 0; y < height; y++)

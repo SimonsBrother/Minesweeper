@@ -10,7 +10,7 @@ void printGridHeader(minefield field, int grid_size_x_digit_count, int grid_size
 void printGridSquare(int square_value, bool show_mines, bool use_square_for_blanks);
 void printChar(char ch, unsigned int count);
 std::string getCommandFromUser();
-int* parseCommand(std::string command);
+vector<int> parseCommand(std::string command);
 bool validateCommand(int* command_parts, int grid_size_x, int grid_size_y);
 
 #endif
